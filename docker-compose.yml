@@ -1,0 +1,46 @@
+version: '3.1'
+
+services:
+
+  mysql:
+    container_name: "willers-mysql"
+    build:  ./db
+    volumes:
+      - "./db/data:/var/lib/mysql"
+      - "./db/migrate:/docker-entrypoint-initdb.d"
+    ports:
+      - "3306:3306"
+    networks:
+      - app-net
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+
+  api:
+    container_name: "willers-api"
+    build: ./api
+    ports:
+      - "1323:1323"
+    networks:
+      - app-net
+    working_dir: /api
+    tty: true
+
+  frontend:
+    container_name: "willers-ui"
+    build: ./frontend
+    volumes:
+      - ./frontend:/frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-net
+    environment: 
+      - NODE_ENV=development
+    working_dir: /frontend
+    tty: true
+
+
+
+networks:
+  app-net:
+    driver: bridge

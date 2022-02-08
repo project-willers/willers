@@ -1,0 +1,38 @@
+{
+  "name": "willers-ui",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/cache": "latest",
+    "@emotion/react": "latest",
+    "@emotion/server": "latest",
+    "@emotion/styled": "latest",
+    "@hookform/resolvers": "^2.8.8",
+    "@mui/icons-material": "latest",
+    "@mui/material": "latest",
+    "@types/react-calendar": "^3.4.5",
+    "axios": "^0.25.0",
+    "jotai": "^1.5.3",
+    "next": "latest",
+    "nookies": "^2.5.2",
+    "react": "latest",
+    "react-calendar": "^3.7.0",
+    "react-dom": "latest",
+    "react-hook-form": "^7.25.1",
+    "yup": "^0.32.11"
+  },
+  "devDependencies": {
+    "@types/node": "16.11.10",
+    "@types/react": "17.0.37",
+    "eslint": "7",
+    "eslint-config-next": "12.0.4",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.0",
+    "typescript": "4.5.2"
+  }
+}
