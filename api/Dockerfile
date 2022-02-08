@@ -1,5 +1,7 @@
 FROM golang:latest
 
+USER api
+
 WORKDIR /api
 COPY ./ /api
 
@@ -11,4 +13,4 @@ ENV CGO_ENABLED=0 \
 
 EXPOSE 1323
 
-CMD ["go", "run", "main.go"]
+ENTRYPOINT ["go", "run", "main.go"]
