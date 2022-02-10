@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 /**
  * UseErrorTryFnCallback type.
@@ -34,15 +34,18 @@ export const useError = (
 ): UseErrorReturn => {
   const [error, setError] = useState<string>()
 
-  const tryFn: UseErrorTryFn = async (callback) => {
-    setError(undefined)
+  const tryFn = useCallback(
+    async (callback: UseErrorTryFnCallback) => {
+      setError(undefined)
 
-    try {
-      await callback()
-    } catch (e) {
-      setError(transform(e) ?? 'エラーが発生しました')
-    }
-  }
+      try {
+        await callback()
+      } catch (e) {
+        setError(transform(e) ?? 'エラーが発生しました')
+      }
+    },
+    [transform]
+  )
 
   return [error, tryFn]
 }
