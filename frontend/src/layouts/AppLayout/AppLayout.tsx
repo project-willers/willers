@@ -1,3 +1,5 @@
+import { useLoading } from '@/hooks/useLoading'
+import { jwtAtom, userAtom } from '@/states/auth'
 import {
   AppBar,
   Box,
@@ -11,7 +13,11 @@ import {
   CSSObject,
   Theme,
   AppBarProps,
+  LinearProgress,
 } from '@mui/material'
+import { useAtom } from 'jotai'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 import { AppLayoutBar } from './AppLayoutBar'
 import { AppLayoutDrawer } from './AppLayoutDrawer'
 
@@ -31,9 +37,35 @@ const drawerWidth = 70
 export const AppLayout: React.VFC<AppLayoutProps> = (props) => {
   const { children, title } = { title: 'Willers', ...props }
 
+  const router = useRouter()
+  const [, setJWT] = useAtom(jwtAtom)
+  const [user] = useAtom(userAtom)
+  const [loading, load] = useLoading()
+
+  const logout = () => {
+    setJWT(null)
+  }
+
+  useEffect(() => {
+    load(async () => {
+      if (!user) {
+        await router.push('/login')
+      }
+    })
+  }, [user, router, load])
+
+  if (!user) {
+    return <></>
+  }
+
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppLayoutBar title={title} drawerWidth={drawerWidth} notifications={1} />
+      <AppLayoutBar
+        title={title}
+        drawerWidth={drawerWidth}
+        notifications={1}
+        logout={logout}
+      />
       <AppLayoutDrawer
         drawerWidth={drawerWidth}
         topItem={{
