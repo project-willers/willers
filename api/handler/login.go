@@ -21,7 +21,7 @@ func Login(c echo.Context) error {
 		return err
 	}
 
-	var user model.Account
+	user := &model.Account{}
 	user, err := model.FindUser(&model.LoginInfo{Name: u.Name})
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func Login(c echo.Context) error {
 		}
 	}
 
-	token, err := auth.CreateToken(&user)
+	token, err := auth.CreateToken(user)
 	if err != nil && token == "" {
 		return echo.ErrInternalServerError
 	}

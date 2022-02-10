@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -22,7 +23,7 @@ func CreateToken(user *model.Account) (string, error) {
 		"name":     user.Name,
 		"email":    user.Email,
 		"password": user.Password,
-		// "exp":      time.Now().Add(time.Minute * 1).Unix(),
+		"exp":      time.Now().Add(time.Minute * 1).Unix(),
 	})
 
 	tokenString, err := token.SignedString(hmacSecret)

@@ -33,42 +33,34 @@ type LoginInfo struct {
 	CreateAt time.Time `json:"created_at"`
 }
 
-func FindUser(u *LoginInfo) (Account, error) {
-	var (
-		user   Account
-		result *sql.Rows
-	)
-	if _, err := mail.ParseAddress(u.Name); err != nil {
-		result, err = db.Database.QueryContext(context.Background(), "SELECT * FROM accounts WHERE name=?", u.Name)
+func FindUser(u *LoginInfo) (*Account, error) {
+	var result *sql.Row
+	if validEmail(u.Name) {
+		result = db.Database.QueryRowContext(context.Background(), "SELECT * FROM accounts WHERE email=?", u.Name)
 	} else {
-		result, err = db.Database.QueryContext(context.Background(), "SELECT * FROM accounts WHERE email=?", u.Name)
+		result = db.Database.QueryRowContext(context.Background(), "SELECT * FROM accounts WHERE name=?", u.Name)
 	}
-	defer result.Close()
-	for result.Next() {
-		if err := result.Scan(&user.Name, &user.Email, &user.Password); err != nil {
-			return user, err
-		}
-		break
+
+	user := &Account{}
+	if err := result.Scan(user.Name, user.Email, user.Password); err != nil {
+		return nil, err
 	}
 	return user, nil
 }
 
 func CreateUser(u *Account) (*Account, error) {
-	var result *sql.Rows
 	if _, err := FindUser(&LoginInfo{Name: u.Name}); err != nil {
 		log.Println(err)
 		return u, err
 	}
-	result, err := db.Database.QueryContext(context.Background(), "INSERT INTO accounts(name, email, password) VALUE(?, ?, ?)", u.Name, u.Email, u.Password)
-	if err != nil {
+	result := db.Database.QueryRowContext(context.Background(), "INSERT INTO accounts(name, email, password) VALUE(?, ?, ?)", u.Name, u.Email, u.Password)
+	if err := result.Scan(u.Name, u.Email, u.Password); err != nil {
 		return u, err
 	}
-	defer result.Close()
-	for result.Next() {
-		if err := result.Scan(&u.Name, &u.Email, &u.Password); err != nil {
-			return u, err
-		}
-		break
-	}
 	return u, nil
+}
+
+func validEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }
