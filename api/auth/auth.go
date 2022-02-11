@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/sha512"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -55,4 +57,10 @@ func Jwtconfig() middleware.JWTConfig {
 			return token, nil
 		},
 	}
+}
+
+func HashStr(trg string) string {
+	sha512 := sha512.Sum512([]byte(trg))
+	hashed := hex.EncodeToString(sha512[:])
+	return hashed
 }

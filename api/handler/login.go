@@ -21,6 +21,8 @@ func Login(c echo.Context) error {
 		return err
 	}
 
+	u.Password = auth.HashStr(u.Password)
+
 	user := &model.Account{}
 	user, err := model.FindUser(&model.LoginInfo{Name: u.Name})
 	if err != nil {

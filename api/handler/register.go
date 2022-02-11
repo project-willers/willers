@@ -25,6 +25,7 @@ func Register(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, user)
+	user.Password = auth.HashStr(user.Password)
 
 	// new User Create
 	u, err := model.CreateUser(user)
