@@ -16,7 +16,7 @@ type Diary struct {
 
 type Diaries []*Diary
 
-func GetDiary(name string) (Diaries, error) {
+func GetDiaries(name string) (Diaries, error) {
 	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM diaries WHERE name=?", name)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func GetDiary(name string) (Diaries, error) {
 }
 
 func UpdateDiary(diary *Diary) error {
-	if _, err := GetDiary(diary.UserName); err != nil {
+	if _, err := GetDiaries(diary.UserName); err != nil {
 		return err
 	}
 
@@ -49,7 +49,7 @@ func AddDiary(diary *Diary) error {
 	// TODO
 	// すでに存在しているならUpdateDiaryにRedirectさせる処理
 	// フロント処理にした方がいい？
-	if _, err := GetDiary(diary.UserName); err != nil {
+	if _, err := GetDiaries(diary.UserName); err != nil {
 		return err
 	}
 
