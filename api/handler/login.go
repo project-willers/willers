@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	echo "github.com/labstack/echo/v4"
 
 	"willers-api/auth"
@@ -17,7 +16,7 @@ func Login(c echo.Context) error {
 	if err := c.Bind(u); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(u); err != nil {
+	if err := validate.Struct(u); err != nil {
 		return err
 	}
 

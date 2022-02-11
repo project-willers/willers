@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	validator "github.com/go-playground/validator/v10"
 	echo "github.com/labstack/echo/v4"
 
 	"willers-api/auth"
@@ -14,7 +13,6 @@ import (
 )
 
 func Register(c echo.Context) error {
-	validate := validator.New()
 	// JSON request
 	user := new(model.Account)
 	if err := c.Bind(user); err != nil {

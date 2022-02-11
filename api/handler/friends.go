@@ -6,14 +6,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 
 	"willers-api/model"
 )
 
 func GetFriend(c echo.Context) error {
-	validate := validator.New()
 	req := new(model.Friend)
 	if err := c.Bind(req); err != nil {
 		return echo.ErrBadRequest
@@ -34,7 +32,6 @@ func GetFriend(c echo.Context) error {
 }
 
 func GetFriendRequest(c echo.Context) error {
-	validate := validator.New()
 	req := new(model.Friend)
 	if err := c.Bind(req); err != nil {
 		return echo.ErrBadRequest
@@ -55,7 +52,6 @@ func GetFriendRequest(c echo.Context) error {
 }
 
 func RequestFriend(c echo.Context) error {
-	validate := validator.New()
 	req := new(model.Friend)
 	if err := c.Bind(req); err != nil {
 		return echo.ErrBadRequest
@@ -73,7 +69,6 @@ func RequestFriend(c echo.Context) error {
 }
 
 func AddFriend(c echo.Context) error {
-	validate := validator.New()
 	req := new(model.FriendResponse)
 	if err := c.Bind(req); err != nil {
 		return echo.ErrBadRequest
@@ -92,7 +87,6 @@ func AddFriend(c echo.Context) error {
 }
 
 func DeleteFriend(c echo.Context) error {
-	validate := validator.New()
 	req := new(model.Friend)
 	if err := c.Bind(req); err != nil {
 		return echo.ErrBadRequest

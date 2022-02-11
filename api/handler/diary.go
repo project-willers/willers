@@ -2,13 +2,6 @@ package handler
 
 import "github.com/labstack/echo/v4"
 
-type Diary interface {
-	Write()
-	Read()
-	Edit()
-	Delete()
-}
-
 func DiaryWrite(c echo.Context) error {
 	return nil
 }
