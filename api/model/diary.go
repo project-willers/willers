@@ -9,7 +9,7 @@ import (
 type Diary struct {
 	UserName  string    `json:"name"`
 	Content   string    `json:"content"`
-	SelectAt  time.Time `json:"select"`
+	SelectAt  time.Time `json:"selectAt"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
