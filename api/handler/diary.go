@@ -34,7 +34,7 @@ func DiaryRead(c echo.Context) error {
 	// debug
 	fmt.Fprintln(os.Stdout, userName)
 
-	diaries, err := model.GetDiary(userName)
+	diaries, err := model.GetDiaries(userName)
 	if err != nil {
 		return err
 	}
