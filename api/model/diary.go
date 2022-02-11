@@ -46,9 +46,6 @@ func UpdateDiary(diary *Diary) error {
 }
 
 func AddDiary(diary *Diary) error {
-	// TODO
-	// すでに存在しているならUpdateDiaryにRedirectさせる処理
-	// フロント処理にした方がいい？
 	if _, err := GetDiaries(diary.UserName); err != nil {
 		return err
 	}
