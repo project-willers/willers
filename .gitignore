@@ -1,2 +1,8 @@
-willers-ui
+# front
 frontend/.env
+
+# backend
+api/willers-api
+
+# db
+db/data/*

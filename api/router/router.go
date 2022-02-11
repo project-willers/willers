@@ -29,6 +29,7 @@ func Init() *echo.Echo {
 
 	// TODO friends
 	api.GET("/friend", handler.GetFriend)
+	api.GET("/getfriendrequest", handler.GetFriendRequest)
 	api.POST("/friend/request", handler.RequestFriend)
 	api.POST("/friend/add", handler.AddFriend)
 	api.POST("/friend/delete", handler.DeleteFriend)
