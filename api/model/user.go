@@ -28,9 +28,8 @@ type Account struct {
 }
 
 type LoginInfo struct {
-	Name     string    `json:"name"`
-	Password string    `json:"password" validate:"required,gte=8,lt=50"`
-	CreateAt time.Time `json:"created_at"`
+	Name     string `json:"name"`
+	Password string `json:"password" validate:"required,gte=8,lt=50"`
 }
 
 func FindUser(u *LoginInfo) (*Account, error) {
