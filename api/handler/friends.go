@@ -11,7 +11,7 @@ import (
 	"willers-api/model"
 )
 
-func GetFriend(c echo.Context) error {
+func GetFriends(c echo.Context) error {
 	req := new(model.Friend)
 	if err := c.Bind(req); err != nil {
 		return echo.ErrBadRequest
@@ -22,7 +22,7 @@ func GetFriend(c echo.Context) error {
 	// debug
 	fmt.Fprintln(os.Stdout, req)
 
-	friends, err := model.FindFriend(req)
+	friends, err := model.FindFriends(req)
 	if err != nil {
 		return err
 	}
