@@ -19,9 +19,8 @@ type FriendResponse struct {
 
 type Friends []*Friend
 
-func FindFriend(name string) (*Friend, error) {
-	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM friends WHERE name=?", name)
-	friend := &Friend{}
+func FindFriend(friend *Friend) (*Friend, error) {
+	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM friends WHERE name=? AND other=?", friend.MyName, friend.OtherName)
 	if err := result.Scan(friend.MyName, friend.OtherName); err != nil {
 		return nil, err
 	}
