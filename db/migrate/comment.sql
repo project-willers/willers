@@ -1,7 +1,7 @@
 -- +migrate Up
 CREATE DATABASE IF NOT EXISTS willers;
 CREATE TABLE IF NOT EXISTS willers.comments (
-  diary_user varchar(255) NOT NULL,
+  diary_user VARCHAR(255) NOT NULL,
   diary_time DATETIME  NOT NULL,
   cmt_user  VARCHAR(255)	NOT NULL,
   cmt VARCHAR(200)  NOT NULL,
