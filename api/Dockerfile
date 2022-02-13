@@ -1,11 +1,7 @@
 FROM golang:latest
 
-USER api
-
 WORKDIR /api
 COPY ./ /api
-
-RUN go build
 
 ENV CGO_ENABLED=0 \
   GOOS=linux \
