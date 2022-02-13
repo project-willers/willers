@@ -28,7 +28,7 @@ func Init() *echo.Echo {
 	api.Use(middleware.JWTWithConfig(auth.Jwtconfig()))
 
 	// TODO friends
-	api.GET("/friend", handler.GetFriend)
+	api.GET("/friend", handler.GetFriends)
 	api.GET("/getfriendrequest", handler.GetFriendRequest)
 	api.POST("/friend/request", handler.RequestFriend)
 	api.POST("/friend/add", handler.AddFriend)
