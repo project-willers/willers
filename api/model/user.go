@@ -7,6 +7,8 @@ import (
 	"net/mail"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	"willers-api/db"
 )
 
@@ -28,7 +30,7 @@ type Account struct {
 }
 
 type LoginInfo struct {
-	Name     string `json:"name"`
+	Name     string `json:"name" validate:"required"`
 	Password string `json:"password" validate:"required,gte=8,lt=50"`
 }
 
@@ -40,22 +42,32 @@ func FindUser(u *LoginInfo) (*Account, error) {
 		result = db.Database.QueryRowContext(context.Background(), "SELECT * FROM accounts WHERE name=?", u.Name)
 	}
 
-	user := &Account{}
-	if err := result.Scan(user.Name, user.Email, user.Password); err != nil {
+	account := &Account{}
+	if err := result.Scan(&account.Name, &account.Email, &account.Password); err != nil {
 		return nil, err
 	}
-	return user, nil
+	return account, nil
 }
 
 func CreateUser(u *Account) (*Account, error) {
-	if _, err := FindUser(&LoginInfo{Name: u.Name}); err != nil {
-		log.Println(err)
+	if _, err := FindUser(&LoginInfo{Name: u.Name}); err == nil {
 		return u, err
 	}
-	result := db.Database.QueryRowContext(context.Background(), "INSERT INTO accounts(name, email, password) VALUE(?, ?, ?)", u.Name, u.Email, u.Password)
-	if err := result.Scan(u.Name, u.Email, u.Password); err != nil {
+	log.Println(u)
+	insert, err := db.Database.Prepare("INSERT INTO accounts(name, email, password) VALUE(?, ?, ?)")
+	if err != nil {
 		return u, err
 	}
+	defer insert.Close()
+	result, err := insert.ExecContext(context.Background(), u.Name, u.Email, u.Password)
+	if err != nil {
+		return u, err
+	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return u, err
+	}
+	log.Println(rowCnt)
 	return u, nil
 }
 
