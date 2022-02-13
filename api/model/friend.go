@@ -19,11 +19,21 @@ type FriendResponse struct {
 
 type Friends []*Friend
 
-func FindFriend(friend *Friend) (Friends, error) {
+func FindFriend(name string) (*Friend, error) {
+	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM friends WHERE name=?", name)
+	friend := &Friend{}
+	if err := result.Scan(friend.MyName, friend.OtherName); err != nil {
+		return nil, err
+	}
+	return friend, nil
+}
+
+func FindFriends(friend *Friend) (Friends, error) {
 	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friends WHERE name=?", friend.MyName)
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 
 	var friends Friends
 	for result.Next() {
@@ -41,6 +51,7 @@ func FindFriendRequest(req *Friend) (Friends, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 
 	var friReqs Friends
 	for result.Next() {

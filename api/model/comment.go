@@ -17,6 +17,14 @@ type Comment struct {
 
 type Comments []*Comment
 
+func getComment(comment *Comment) (*Comment, error) {
+	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM comments WHERE diary_user=? AND diary_time=? AND cmt_user=? AND cmt=?", comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
+	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
+		return nil, err
+	}
+	return comment, nil
+}
+
 func GetComments(diary *Diary) (Comments, error) {
 	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM comments WHERE diary_user=? AND diary_time=?", diary.UserName, diary.SelectAt)
 	if err != nil {
@@ -32,14 +40,6 @@ func GetComments(diary *Diary) (Comments, error) {
 		comments = append(comments, c)
 	}
 	return comments, nil
-}
-
-func getComment(comment *Comment) (*Comment, error) {
-	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM comments WHERE diary_user=? AND diary_time=? AND cmt_user=? AND cmt=?", comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
-	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
-		return nil, err
-	}
-	return comment, nil
 }
 
 func UpdateComment(comment *Comment) error {

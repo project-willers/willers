@@ -16,11 +16,21 @@ type Diary struct {
 
 type Diaries []*Diary
 
+func GetDiary(diary *Diary) (*Diary, error) {
+	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM diaries WHERE name=? AND content=? AND select_at=?", diary.UserName, diary.Content, diary.SelectAt)
+
+	if err := result.Scan(diary.UserName, diary.Content, diary.SelectAt, diary.CreatedAt, diary.UpdatedAt); err != nil {
+		return nil, err
+	}
+	return diary, nil
+}
+
 func GetDiaries(name string) (Diaries, error) {
 	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM diaries WHERE name=?", name)
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 
 	var diaries Diaries
 	for result.Next() {
