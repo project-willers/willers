@@ -27,8 +27,8 @@ func FindFriend(friend *Friend) (*Friend, error) {
 	return friend, nil
 }
 
-func FindFriends(friend *Friend) (Friends, error) {
-	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friends WHERE name=?", friend.MyName)
+func FindFriends(name string) (Friends, error) {
+	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friends WHERE name=?", name)
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +45,26 @@ func FindFriends(friend *Friend) (Friends, error) {
 	return friends, nil
 }
 
-func FindFriendRequest(req *Friend) (Friends, error) {
-	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friendrequests WHERE name=?", req.MyName)
+func FindFriendRequest(friend *Friend) (Friends, error) {
+	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friendrequests WHERE name=? AND other=?", friend.MyName, friend.OtherName)
+	if err != nil {
+		return nil, err
+	}
+	defer result.Close()
+
+	var friReqs Friends
+	for result.Next() {
+		friReq := &Friend{}
+		if err := result.Scan(friReq.MyName, friReq.OtherName); err != nil {
+			return nil, err
+		}
+		friReqs = append(friReqs, friReq)
+	}
+	return friReqs, nil
+}
+
+func FindFriendRequests(name string) (Friends, error) {
+	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friendrequests WHERE name=?", name)
 	if err != nil {
 		return nil, err
 	}
