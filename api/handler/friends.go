@@ -3,46 +3,46 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 
 	"willers-api/model"
 )
 
 func GetFriends(c echo.Context) error {
-	req := new(model.Friend)
-	if err := c.Bind(req); err != nil {
-		return echo.ErrBadRequest
-	}
-	if err := validate.Struct(req); err != nil {
-		return echo.ErrBadRequest
-	}
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
 	// debug
-	fmt.Fprintln(os.Stdout, req)
+	fmt.Fprintln(os.Stdout, name)
 
-	friends, err := model.FindFriends(req)
+	friends, err := model.FindFriends(name)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
 	json, err := json.Marshal(friends)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	log.Println(json)
 	return c.JSON(http.StatusOK, json)
 }
 
-func GetFriendRequest(c echo.Context) error {
-	req := new(model.Friend)
-	if err := c.Bind(req); err != nil {
-		return echo.ErrBadRequest
-	}
-	if err := validate.Struct(req); err != nil {
-		return echo.ErrBadRequest
-	}
+func GetFriendRequests(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
 	// debug
-	fmt.Fprintln(os.Stdout, req)
+	fmt.Fprintln(os.Stdout, name)
 
-	friends, err := model.FindFriendRequest(req)
+	friends, err := model.FindFriendRequests(name)
 	if err != nil {
 		return err
 	}
