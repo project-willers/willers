@@ -82,9 +82,9 @@ func FindFriendRequests(name string) (Friends, error) {
 }
 
 func FriendRequest(req *Friend) error {
-	if _, err := FindFriendRequest(req); err != nil {
-		return err
-	}
+	//	if _, err := FindFriendRequest(req); err != nil {
+	//		return err
+	//	}
 
 	insert, err := db.Database.Prepare("INSERT INTO friendrequests(name, other) VALUE(?, ?)")
 	if err != nil {

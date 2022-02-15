@@ -54,9 +54,11 @@ func GetFriendRequests(c echo.Context) error {
 func RequestFriend(c echo.Context) error {
 	req := new(model.Friend)
 	if err := c.Bind(req); err != nil {
+		log.Println(err)
 		return echo.ErrBadRequest
 	}
 	if err := validate.Struct(req); err != nil {
+		log.Println(err)
 		return echo.ErrBadRequest
 	}
 	// debug
@@ -67,6 +69,8 @@ func RequestFriend(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if req.MyName != name {
+		log.Println(name)
+		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -93,6 +97,7 @@ func AddFriend(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if req.MyName != name {
+		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -119,6 +124,7 @@ func DeleteFriend(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if req.MyName != name {
+		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 

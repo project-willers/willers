@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"willers-api/model"
@@ -27,6 +28,7 @@ func DiaryWrite(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if diary.UserName != name {
+		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -69,6 +71,7 @@ func DiaryEdit(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if diary.UserName != name {
+		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -95,6 +98,7 @@ func DiaryDelete(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if diary.UserName != name {
+		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
