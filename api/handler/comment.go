@@ -7,6 +7,7 @@ import (
 	"os"
 	"willers-api/model"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,6 +21,14 @@ func CommentWrite(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, comment)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if comment.CommentUser != name {
+		return echo.ErrBadRequest
+	}
 
 	if err := model.AddComment(comment); err != nil {
 		return echo.ErrInternalServerError
@@ -59,6 +68,14 @@ func CommentEdit(c echo.Context) error {
 	// debug
 	fmt.Fprintln(os.Stdout, comment)
 
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if comment.CommentUser != name {
+		return echo.ErrBadRequest
+	}
+
 	if err := model.UpdateComment(comment); err != nil {
 		return echo.ErrInternalServerError
 	}
@@ -76,6 +93,14 @@ func CommentDelete(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, comment)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if comment.CommentUser != name {
+		return echo.ErrBadRequest
+	}
 
 	if err := model.DeleteComment(comment); err != nil {
 		return echo.ErrInternalServerError

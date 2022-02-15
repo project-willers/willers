@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"log"
 	"time"
 	"willers-api/db"
 )
@@ -48,10 +49,20 @@ func UpdateDiary(diary *Diary) error {
 		return err
 	}
 
-	result := db.Database.QueryRowContext(context.Background(), "UPDATE diaries SET content=? WHERE name=? AND select_at=?", diary.Content, diary.UserName, diary.SelectAt)
-	if err := result.Scan(diary.UserName, diary.Content, diary.SelectAt, diary.CreatedAt, diary.UpdatedAt); err != nil {
+	update, err := db.Database.Prepare("UPDATE diaries SET content=? WHERE name=? AND select_at=?")
+	if err != nil {
 		return err
 	}
+	defer update.Close()
+	result, err := update.ExecContext(context.Background(), diary.Content, diary.UserName, diary.SelectAt)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Println(rowCnt)
 	return nil
 }
 
@@ -59,11 +70,20 @@ func AddDiary(diary *Diary) error {
 	if _, err := GetDiaries(diary.UserName); err != nil {
 		return err
 	}
-
-	result := db.Database.QueryRowContext(context.Background(), "INSERT INTO diaries(name, content, select_at) VALUE(?, ?, ?)", diary.UserName, diary.Content, diary.SelectAt)
-	if err := result.Scan(diary.UserName, diary.Content, diary.SelectAt, diary.CreatedAt, diary.UpdatedAt); err != nil {
+	insert, err := db.Database.Prepare("INSERT INTO accounts(name, email, password) VALUE(?, ?, ?)")
+	if err != nil {
 		return err
 	}
+	defer insert.Close()
+	result, err := insert.ExecContext(context.Background(), diary.UserName, diary.Content, diary.SelectAt)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Println(rowCnt)
 	return nil
 }
 

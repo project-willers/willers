@@ -61,6 +61,15 @@ func RequestFriend(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, req)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if req.MyName != name {
+		return echo.ErrBadRequest
+	}
+
 	if err := model.FriendRequest(req); err != nil {
 		return echo.ErrInternalServerError
 	}
@@ -79,6 +88,14 @@ func AddFriend(c echo.Context) error {
 	// debug
 	fmt.Fprintln(os.Stdout, req)
 
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if req.MyName != name {
+		return echo.ErrBadRequest
+	}
+
 	if err := model.AddFriend(req); err != nil {
 		return echo.ErrInternalServerError
 	}
@@ -96,6 +113,15 @@ func DeleteFriend(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, req)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if req.MyName != name {
+		return echo.ErrBadRequest
+	}
+
 	if err := model.DeleteFriend(req); err != nil {
 		return echo.ErrInternalServerError
 	}

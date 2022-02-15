@@ -7,6 +7,7 @@ import (
 	"os"
 	"willers-api/model"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,6 +21,15 @@ func DiaryWrite(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, diary)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if diary.UserName != name {
+		return echo.ErrBadRequest
+	}
+
 	if err := model.AddDiary(diary); err != nil {
 		return echo.ErrInternalServerError
 	}
@@ -28,13 +38,13 @@ func DiaryWrite(c echo.Context) error {
 }
 
 func DiaryRead(c echo.Context) error {
-	// TODO
-	// jwt tokenからusernameを取得
-	userName := ""
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
 	// debug
-	fmt.Fprintln(os.Stdout, userName)
+	fmt.Fprintln(os.Stdout, name)
 
-	diaries, err := model.GetDiaries(userName)
+	diaries, err := model.GetDiaries(name)
 	if err != nil {
 		return err
 	}
@@ -53,6 +63,15 @@ func DiaryEdit(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, diary)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if diary.UserName != name {
+		return echo.ErrBadRequest
+	}
+
 	if err := model.UpdateDiary(diary); err != nil {
 		return echo.ErrInternalServerError
 	}
@@ -70,6 +89,15 @@ func DiaryDelete(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, diary)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if diary.UserName != name {
+		return echo.ErrBadRequest
+	}
+
 	if err := model.DeleteDiary(diary); err != nil {
 		return echo.ErrInternalServerError
 	}
