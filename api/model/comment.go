@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"log"
 	"time"
 	"willers-api/db"
 )
@@ -47,10 +48,20 @@ func UpdateComment(comment *Comment) error {
 		return err
 	}
 
-	result := db.Database.QueryRowContext(context.Background(), "UPDATE comments SET cmt=? WHERE diary_user=? AND diary_time=? AND cmt_user=?", comment.DiaryUser, comment.DiaryTime, comment.CommentUser)
-	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
+	update, err := db.Database.Prepare("UPDATE comments SET cmt=? WHERE diary_user=? AND diary_time=? AND cmt_user=?")
+	if err != nil {
 		return err
 	}
+	defer update.Close()
+	result, err := update.ExecContext(context.Background(), comment.DiaryUser, comment.DiaryTime, comment.CommentUser)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Println(rowCnt)
 	return nil
 }
 
@@ -59,17 +70,37 @@ func AddComment(comment *Comment) error {
 		return err
 	}
 
-	result := db.Database.QueryRowContext(context.Background(), "INSERT INTO comments(diary_user, diary_time, cmt_user, cmt) VALUE(?, ?, ?, ?)", comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
-	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
+	insert, err := db.Database.Prepare("INSERT INTO comments(diary_user, diary_time, cmt_user, cmt) VALUE(?, ?, ?, ?)")
+	if err != nil {
 		return err
 	}
+	defer insert.Close()
+	result, err := insert.ExecContext(context.Background(), comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Println(rowCnt)
 	return nil
 }
 
 func DeleteComment(comment *Comment) error {
-	result := db.Database.QueryRowContext(context.Background(), "DELETE FROM comments WHERE diary_user=? AND diary_time=? AND cmt_user=? AND cmt=?", comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
-	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
+	del, err := db.Database.Prepare("DELETE FROM comments WHERE diary_user=? AND diary_time=? AND cmt_user=? AND cmt=?")
+	if err != nil {
 		return err
 	}
+	defer del.Close()
+	result, err := del.ExecContext(context.Background(), comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Println(rowCnt)
 	return nil
 }

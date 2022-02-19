@@ -2,7 +2,7 @@ package model
 
 import (
 	"context"
-	"database/sql"
+	"log"
 	"willers-api/db"
 )
 
@@ -82,13 +82,24 @@ func FindFriendRequests(name string) (Friends, error) {
 }
 
 func FriendRequest(req *Friend) error {
-	if _, err := FindFriendRequest(req); err != nil {
+	//	if _, err := FindFriendRequest(req); err != nil {
+	//		return err
+	//	}
+
+	insert, err := db.Database.Prepare("INSERT INTO friendrequests(name, other) VALUE(?, ?)")
+	if err != nil {
 		return err
 	}
-	result := db.Database.QueryRowContext(context.Background(), "INSERT INTO friendrequests(name, other) VALUE(?, ?)", req.MyName, req.OtherName)
-	if err := result.Scan(req.MyName, req.OtherName); err != nil {
+	defer insert.Close()
+	result, err := insert.ExecContext(context.Background(), req.MyName, req.OtherName)
+	if err != nil {
 		return err
 	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Println(rowCnt)
 	return nil
 }
 
@@ -100,20 +111,41 @@ func AddFriend(res *FriendResponse) error {
 	if _, err := FindFriendRequest(req); err != nil {
 		return err
 	}
-	var result *sql.Row
 	if res.Ok {
-		result = db.Database.QueryRowContext(context.Background(), "INSERT INTO friends(name, other) VALUE(?, ?)", req.MyName, req.OtherName)
+		insert, err := db.Database.Prepare("INSERT INTO friends(name, other) VALUE(?, ?)")
+		if err != nil {
+			return err
+		}
+		defer insert.Close()
+		_, err = insert.ExecContext(context.Background(), req.MyName, req.OtherName)
+		if err != nil {
+			return err
+		}
 	}
-	db.Database.QueryRowContext(context.Background(), "DELETE FROM friendrequests WHERE name=? AND other=?", req.MyName, req.OtherName)
-	if err := result.Scan(req.MyName, req.OtherName); err != nil {
+	del, err := db.Database.Prepare("DELETE FROM friendrequests WHERE name=? AND other=?")
+	if err != nil {
+		return err
+	}
+	defer del.Close()
+	_, err = del.ExecContext(context.Background(), req.MyName, req.OtherName)
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
 func DeleteFriend(friend *Friend) error {
-	result := db.Database.QueryRowContext(context.Background(), "DELETE FROM friendrequests WHERE name=? AND other=?", friend.MyName, friend.OtherName)
-	if err := result.Scan(friend.MyName, friend.OtherName); err != nil {
+	if _, err := FindFriend(friend); err != nil {
+		return err
+	}
+
+	del, err := db.Database.Prepare("DELETE FROM friends WHERE name=? AND other=?")
+	if err != nil {
+		return err
+	}
+	defer del.Close()
+	_, err = del.ExecContext(context.Background(), friend.MyName, friend.OtherName)
+	if err != nil {
 		return err
 	}
 	return nil
