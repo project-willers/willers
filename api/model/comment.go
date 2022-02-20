@@ -18,12 +18,16 @@ type Comment struct {
 
 type Comments []*Comment
 
-func getComment(comment *Comment) (*Comment, error) {
+type C struct {
+	Comments Comments
+}
+
+func (comment *Comment) GetComment() error {
 	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM comments WHERE diary_user=? AND diary_time=? AND cmt_user=? AND cmt=?", comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
 	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
-		return nil, err
+		return err
 	}
-	return comment, nil
+	return nil
 }
 
 func GetComments(diary *Diary) (Comments, error) {
@@ -34,17 +38,17 @@ func GetComments(diary *Diary) (Comments, error) {
 
 	var comments Comments
 	for result.Next() {
-		c := &Comment{}
-		if err := result.Scan(c.DiaryUser, c.DiaryTime, c.CommentUser, c.Comment, c.CreatedAt, c.UpdatedAt); err != nil {
+		var c Comment
+		if err := result.Scan(&c.DiaryUser, &c.DiaryTime, &c.CommentUser, &c.Comment, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
-		comments = append(comments, c)
+		comments = append(comments, &c)
 	}
 	return comments, nil
 }
 
 func UpdateComment(comment *Comment) error {
-	if _, err := getComment(comment); err != nil {
+	if err := comment.GetComment(); err != nil {
 		return err
 	}
 
@@ -66,7 +70,7 @@ func UpdateComment(comment *Comment) error {
 }
 
 func AddComment(comment *Comment) error {
-	if _, err := getComment(comment); err != nil {
+	if err := comment.GetComment(); err != nil {
 		return err
 	}
 
@@ -88,6 +92,10 @@ func AddComment(comment *Comment) error {
 }
 
 func DeleteComment(comment *Comment) error {
+	if err := comment.GetComment(); err != nil {
+		return err
+	}
+
 	del, err := db.Database.Prepare("DELETE FROM comments WHERE diary_user=? AND diary_time=? AND cmt_user=? AND cmt=?")
 	if err != nil {
 		return err

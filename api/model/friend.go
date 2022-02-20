@@ -19,12 +19,16 @@ type FriendResponse struct {
 
 type Friends []*Friend
 
-func FindFriend(friend *Friend) (*Friend, error) {
+type F struct {
+	Friends Friends
+}
+
+func (friend *Friend) FindFriend() error {
 	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM friends WHERE name=? AND other=?", friend.MyName, friend.OtherName)
-	if err := result.Scan(friend.MyName, friend.OtherName); err != nil {
-		return nil, err
+	if err := result.Scan(&friend.MyName, &friend.OtherName); err != nil {
+		return err
 	}
-	return friend, nil
+	return nil
 }
 
 func FindFriends(name string) (Friends, error) {
@@ -36,12 +40,13 @@ func FindFriends(name string) (Friends, error) {
 
 	var friends Friends
 	for result.Next() {
-		fri := &Friend{}
-		if err := result.Scan(fri.MyName, fri.OtherName); err != nil {
+		var f Friend
+		if err := result.Scan(&f.MyName, &f.OtherName); err != nil {
 			return nil, err
 		}
-		friends = append(friends, fri)
+		friends = append(friends, &f)
 	}
+	log.Println(friends)
 	return friends, nil
 }
 
@@ -54,11 +59,11 @@ func FindFriendRequest(friend *Friend) (Friends, error) {
 
 	var friReqs Friends
 	for result.Next() {
-		friReq := &Friend{}
-		if err := result.Scan(friReq.MyName, friReq.OtherName); err != nil {
+		var friReq Friend
+		if err := result.Scan(&friReq.MyName, &friReq.OtherName); err != nil {
 			return nil, err
 		}
-		friReqs = append(friReqs, friReq)
+		friReqs = append(friReqs, &friReq)
 	}
 	return friReqs, nil
 }
@@ -72,19 +77,19 @@ func FindFriendRequests(name string) (Friends, error) {
 
 	var friReqs Friends
 	for result.Next() {
-		friReq := &Friend{}
-		if err := result.Scan(friReq.MyName, friReq.OtherName); err != nil {
+		var friReq Friend
+		if err := result.Scan(&friReq.MyName, &friReq.OtherName); err != nil {
 			return nil, err
 		}
-		friReqs = append(friReqs, friReq)
+		friReqs = append(friReqs, &friReq)
 	}
 	return friReqs, nil
 }
 
 func FriendRequest(req *Friend) error {
-	//	if _, err := FindFriendRequest(req); err != nil {
-	//		return err
-	//	}
+	if err := req.FindFriend(); err != nil {
+		return err
+	}
 
 	insert, err := db.Database.Prepare("INSERT INTO friendrequests(name, other) VALUE(?, ?)")
 	if err != nil {
@@ -135,7 +140,7 @@ func AddFriend(res *FriendResponse) error {
 }
 
 func DeleteFriend(friend *Friend) error {
-	if _, err := FindFriend(friend); err != nil {
+	if err := friend.FindFriend(); err != nil {
 		return err
 	}
 

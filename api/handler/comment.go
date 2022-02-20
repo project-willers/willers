@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"willers-api/model"
@@ -28,7 +26,6 @@ func CommentWrite(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if comment.CommentUser != name {
-		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -36,7 +33,7 @@ func CommentWrite(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "{}")
 }
 
 func CommentRead(c echo.Context) error {
@@ -55,8 +52,11 @@ func CommentRead(c echo.Context) error {
 		return err
 	}
 
-	json, err := json.Marshal(comments)
-	return c.JSON(http.StatusOK, json)
+	co := model.C{
+		Comments: comments,
+	}
+
+	return c.JSON(http.StatusOK, co)
 }
 
 func CommentEdit(c echo.Context) error {
@@ -75,7 +75,6 @@ func CommentEdit(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if comment.CommentUser != name {
-		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -83,7 +82,7 @@ func CommentEdit(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "{}")
 }
 
 func CommentDelete(c echo.Context) error {
@@ -102,7 +101,6 @@ func CommentDelete(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if comment.CommentUser != name {
-		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -110,5 +108,5 @@ func CommentDelete(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "{}")
 }

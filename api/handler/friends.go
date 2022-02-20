@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -26,13 +25,11 @@ func GetFriends(c echo.Context) error {
 		return err
 	}
 
-	json, err := json.Marshal(friends)
-	if err != nil {
-		log.Println(err)
-		return err
+	f := model.F{
+		Friends: friends,
 	}
-	log.Println(json)
-	return c.JSON(http.StatusOK, json)
+
+	return c.JSON(http.StatusOK, f)
 }
 
 func GetFriendRequests(c echo.Context) error {
@@ -47,8 +44,11 @@ func GetFriendRequests(c echo.Context) error {
 		return err
 	}
 
-	json, err := json.Marshal(friends)
-	return c.JSON(http.StatusOK, json)
+	f := model.F{
+		Friends: friends,
+	}
+
+	return c.JSON(http.StatusOK, f)
 }
 
 func RequestFriend(c echo.Context) error {
@@ -69,8 +69,6 @@ func RequestFriend(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if req.MyName != name {
-		log.Println(name)
-		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -78,7 +76,7 @@ func RequestFriend(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "{}")
 }
 
 func AddFriend(c echo.Context) error {
@@ -97,7 +95,6 @@ func AddFriend(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if req.MyName != name {
-		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -105,7 +102,7 @@ func AddFriend(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "{}")
 }
 
 func DeleteFriend(c echo.Context) error {
@@ -124,7 +121,6 @@ func DeleteFriend(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	if req.MyName != name {
-		log.Println("You are not user!")
 		return echo.ErrBadRequest
 	}
 
@@ -132,5 +128,5 @@ func DeleteFriend(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "{}")
 }
