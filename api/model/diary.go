@@ -8,10 +8,10 @@ import (
 )
 
 type Diary struct {
-	UserName  string `json:"name"`
-	Content   string `json:"content"`
-	SelectAt  string `json:"selectAt"`
-	UpdatedAt string `json:"updatedAt"`
+	UserName  string `json:"name" validate:"required"`
+	Content   string `json:"content" validate:"required"`
+	SelectAt  string `json:"selectAt" validate:"required"`
+	UpdatedAt string `json:"updatedAt" validate:"required"`
 }
 
 type Diaries []*Diary
@@ -21,13 +21,15 @@ type D struct {
 }
 
 func (diary *Diary) GetDiary() error {
-	t, err := time.Parse("2006-01-02 03:04:05", diary.SelectAt)
+	t, err := time.Parse("2006-01-02 15:04:05", diary.SelectAt)
 	if err != nil {
+		log.Println("GetDiary Parse() Error: ", err)
 		return err
 	}
 	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM diaries WHERE name=? AND content=? AND select_at=?", diary.UserName, diary.Content, t)
 
 	if err := result.Scan(&diary.UserName, &diary.Content, &diary.SelectAt, &diary.UpdatedAt); err != nil {
+		log.Println("GetDiary Scan() Error: ", err)
 		return err
 	}
 	return nil
@@ -36,7 +38,7 @@ func (diary *Diary) GetDiary() error {
 func GetDiaries(name string) (Diaries, error) {
 	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM diaries WHERE name=?", name)
 	if err != nil {
-		log.Println(err)
+		log.Println("GetDiaries QueryContext() Error: ", err)
 		return nil, err
 	}
 	defer result.Close()
@@ -45,7 +47,7 @@ func GetDiaries(name string) (Diaries, error) {
 	for result.Next() {
 		var d Diary
 		if err := result.Scan(&d.UserName, &d.Content, &d.SelectAt, &d.UpdatedAt); err != nil {
-			log.Println(err)
+			log.Println("GetDiaries Scan() Error: ", err)
 			return nil, err
 		}
 		diaries = append(diaries, &d)
@@ -56,24 +58,29 @@ func GetDiaries(name string) (Diaries, error) {
 
 func UpdateDiary(diary *Diary) error {
 	if _, err := GetDiaries(diary.UserName); err != nil {
+		log.Println("UpdateDiary GetDiaries() Error: ", err)
 		return err
 	}
 
 	update, err := db.Database.Prepare("UPDATE diaries SET content=? WHERE name=? AND select_at=?")
 	if err != nil {
+		log.Println("UpdateDiary GetDiaries() Error: ", err)
 		return err
 	}
 	defer update.Close()
-	t, err := time.Parse("2006-01-02 03:04:05", diary.SelectAt)
+	t, err := time.Parse("2006-01-02 15:04:05", diary.SelectAt)
 	if err != nil {
+		log.Println("UpdateDiary time.Parse() Error: ", err)
 		return err
 	}
 	result, err := update.ExecContext(context.Background(), diary.Content, diary.UserName, t)
 	if err != nil {
+		log.Println("UpdateDiary ExecContext() Error: ", err)
 		return err
 	}
 	rowCnt, err := result.RowsAffected()
 	if err != nil {
+		log.Println("UpdateDiary RowsAffected() Error: ", err)
 		return err
 	}
 	log.Println(rowCnt)
@@ -82,7 +89,7 @@ func UpdateDiary(diary *Diary) error {
 
 func AddDiary(diary *Diary) error {
 	if _, err := GetDiaries(diary.UserName); err != nil {
-		log.Println(err)
+		log.Println("UpdateDiary RowsAffected() Error: ", err)
 		return err
 	}
 	insert, err := db.Database.Prepare("INSERT INTO diaries(name, content, select_at) VALUE(?, ?, ?)")
@@ -91,7 +98,7 @@ func AddDiary(diary *Diary) error {
 		return err
 	}
 	defer insert.Close()
-	t, err := time.Parse("2006-01-02 03:04:05", diary.SelectAt)
+	t, err := time.Parse("2006-01-02 15:04:05", diary.SelectAt)
 	if err != nil {
 		return err
 	}
