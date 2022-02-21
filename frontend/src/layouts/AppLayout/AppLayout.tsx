@@ -18,9 +18,10 @@ import {
 } from '@mui/material'
 import { useAtom } from 'jotai'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AppLayoutBar } from './AppLayoutBar'
 import { AppLayoutDrawer } from './AppLayoutDrawer'
+import { NewDiaryDialog } from './NewDiaryDialog'
 
 /**
  * AppLayout props.
@@ -42,6 +43,7 @@ export const AppLayout: React.VFC<AppLayoutProps> = (props) => {
   const [jwt, setJWT] = useAtom(jwtAtom)
   const [user] = useAtom(userAtom)
   const [loading, load] = useLoading()
+  const [openDiaryDialog, setOpenDiaryDialog] = useState(false)
 
   const logout = () => {
     setJWT(null)
@@ -69,6 +71,7 @@ export const AppLayout: React.VFC<AppLayoutProps> = (props) => {
         drawerWidth={drawerWidth}
         notifications={1}
         logout={logout}
+        addDiary={() => setOpenDiaryDialog(true)}
       />
       <AppLayoutDrawer
         drawerWidth={drawerWidth}
@@ -88,6 +91,10 @@ export const AppLayout: React.VFC<AppLayoutProps> = (props) => {
             notifications: 0,
           },
         ]}
+      />
+      <NewDiaryDialog
+        open={openDiaryDialog}
+        onClose={() => setOpenDiaryDialog(false)}
       />
       <Box
         component="main"

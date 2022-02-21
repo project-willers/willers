@@ -11,13 +11,14 @@ export type AppLayoutBarProps = {
   title: string
   notifications: number
   logout(): void
+  addDiary(): void
 }
 
 /**
  * AppLayoutBar component.
  */
 export const AppLayoutBar: React.VFC<AppLayoutBarProps> = (props) => {
-  const { drawerWidth, title, notifications, logout } = props
+  const { drawerWidth, title, notifications, logout, addDiary } = props
 
   return (
     <>
@@ -37,7 +38,7 @@ export const AppLayoutBar: React.VFC<AppLayoutBarProps> = (props) => {
             </Button>
           </Link>
           <Box mx={1} />
-          <IconButton size="large" color="inherit">
+          <IconButton size="large" color="inherit" onClick={addDiary}>
             <NoteAdd />
           </IconButton>
           <Box mx={1} />
