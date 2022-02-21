@@ -34,6 +34,7 @@ func (friend *Friend) FindFriend() error {
 func FindFriends(name string) (Friends, error) {
 	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friends WHERE name=?", name)
 	if err != nil {
+		log.Println("FindFriends QueryContext() Error: ", err)
 		return nil, err
 	}
 	defer result.Close()
@@ -42,6 +43,7 @@ func FindFriends(name string) (Friends, error) {
 	for result.Next() {
 		var f Friend
 		if err := result.Scan(&f.MyName, &f.OtherName); err != nil {
+			log.Println("FindFriends Scan() Error: ", err)
 			return nil, err
 		}
 		friends = append(friends, &f)
@@ -50,9 +52,10 @@ func FindFriends(name string) (Friends, error) {
 	return friends, nil
 }
 
-func FindFriendRequest(friend *Friend) (Friends, error) {
-	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friendrequests WHERE name=? AND other=?", friend.MyName, friend.OtherName)
+func FindFriendRequest(name string) (Friends, error) {
+	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friendrequests WHERE name=?", name)
 	if err != nil {
+		log.Println("FindFriendRequest QueryContext() Error: ", err)
 		return nil, err
 	}
 	defer result.Close()
@@ -61,6 +64,7 @@ func FindFriendRequest(friend *Friend) (Friends, error) {
 	for result.Next() {
 		var friReq Friend
 		if err := result.Scan(&friReq.MyName, &friReq.OtherName); err != nil {
+			log.Println("FindFriendRequest Scan() Error: ", err)
 			return nil, err
 		}
 		friReqs = append(friReqs, &friReq)
@@ -68,9 +72,10 @@ func FindFriendRequest(friend *Friend) (Friends, error) {
 	return friReqs, nil
 }
 
-func FindFriendRequests(name string) (Friends, error) {
+func GetMyFriendRequests(name string) (Friends, error) {
 	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friendrequests WHERE name=?", name)
 	if err != nil {
+		log.Println("FindFriendRequests QueryContext() Error: ", err)
 		return nil, err
 	}
 	defer result.Close()
@@ -79,6 +84,27 @@ func FindFriendRequests(name string) (Friends, error) {
 	for result.Next() {
 		var friReq Friend
 		if err := result.Scan(&friReq.MyName, &friReq.OtherName); err != nil {
+			log.Println("FindFriendRequests Scan() Error: ", err)
+			return nil, err
+		}
+		friReqs = append(friReqs, &friReq)
+	}
+	return friReqs, nil
+}
+
+func GetOtherFriendRequests(other string) (Friends, error) {
+	result, err := db.Database.QueryContext(context.Background(), "SELECT * FROM friendrequests WHERE other=?", other)
+	if err != nil {
+		log.Println("FindFriendRequests QueryContext() Error: ", err)
+		return nil, err
+	}
+	defer result.Close()
+
+	var friReqs Friends
+	for result.Next() {
+		var friReq Friend
+		if err := result.Scan(&friReq.MyName, &friReq.OtherName); err != nil {
+			log.Println("FindFriendRequests Scan() Error: ", err)
 			return nil, err
 		}
 		friReqs = append(friReqs, &friReq)
@@ -87,24 +113,28 @@ func FindFriendRequests(name string) (Friends, error) {
 }
 
 func FriendRequest(req *Friend) error {
-	if err := req.FindFriend(); err != nil {
+	if err := req.FindFriend(); err == nil {
+		log.Println("FriendRequest FindFriend() Error: ", err)
 		return err
 	}
 
 	insert, err := db.Database.Prepare("INSERT INTO friendrequests(name, other) VALUE(?, ?)")
 	if err != nil {
+		log.Println("FriendRequest Prepare() Error: ", err)
 		return err
 	}
 	defer insert.Close()
 	result, err := insert.ExecContext(context.Background(), req.MyName, req.OtherName)
 	if err != nil {
+		log.Println("FriendRequest ExecContent() Error: ", err)
 		return err
 	}
 	rowCnt, err := result.RowsAffected()
 	if err != nil {
+		log.Println("FriendRequest RowsAffected() Error: ", err)
 		return err
 	}
-	log.Println(rowCnt)
+	log.Println("FriendRequest rowCnt: ", rowCnt)
 	return nil
 }
 
@@ -113,27 +143,32 @@ func AddFriend(res *FriendResponse) error {
 		MyName:    res.MyName,
 		OtherName: res.OtherName,
 	}
-	if _, err := FindFriendRequest(req); err != nil {
+	if _, err := GetOtherFriendRequests(res.MyName); err != nil {
+		log.Println("AddFriend FindFriendRequest() Error: ", err)
 		return err
 	}
 	if res.Ok {
 		insert, err := db.Database.Prepare("INSERT INTO friends(name, other) VALUE(?, ?)")
 		if err != nil {
+			log.Println("AddFriend Insert-Prepare() Error: ", err)
 			return err
 		}
 		defer insert.Close()
 		_, err = insert.ExecContext(context.Background(), req.MyName, req.OtherName)
 		if err != nil {
+			log.Println("AddFriend Insert-ExecContext() Error: ", err)
 			return err
 		}
 	}
 	del, err := db.Database.Prepare("DELETE FROM friendrequests WHERE name=? AND other=?")
 	if err != nil {
+		log.Println("AddFriend Delete-Prepare() Error: ", err)
 		return err
 	}
 	defer del.Close()
 	_, err = del.ExecContext(context.Background(), req.MyName, req.OtherName)
 	if err != nil {
+		log.Println("AddFriend Delete-ExecContext() Error: ", err)
 		return err
 	}
 	return nil
@@ -146,11 +181,13 @@ func DeleteFriend(friend *Friend) error {
 
 	del, err := db.Database.Prepare("DELETE FROM friends WHERE name=? AND other=?")
 	if err != nil {
+		log.Println("DeleteFriend Prepare() Error: ", err)
 		return err
 	}
 	defer del.Close()
 	_, err = del.ExecContext(context.Background(), friend.MyName, friend.OtherName)
 	if err != nil {
+		log.Println("DeleteFriend ExecContext() Error: ", err)
 		return err
 	}
 	return nil

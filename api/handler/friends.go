@@ -32,14 +32,33 @@ func GetFriends(c echo.Context) error {
 	return c.JSON(http.StatusOK, f)
 }
 
-func GetFriendRequests(c echo.Context) error {
+func GetMyFriendRequests(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	// debug
 	fmt.Fprintln(os.Stdout, name)
 
-	friends, err := model.FindFriendRequests(name)
+	friends, err := model.GetMyFriendRequests(name)
+	if err != nil {
+		return err
+	}
+
+	f := model.F{
+		Friends: friends,
+	}
+
+	return c.JSON(http.StatusOK, f)
+}
+
+func GetOtherFriendRequests(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	// debug
+	fmt.Fprintln(os.Stdout, name)
+
+	friends, err := model.GetOtherFriendRequests(name)
 	if err != nil {
 		return err
 	}
@@ -82,9 +101,11 @@ func RequestFriend(c echo.Context) error {
 func AddFriend(c echo.Context) error {
 	req := new(model.FriendResponse)
 	if err := c.Bind(req); err != nil {
+		log.Println(err)
 		return echo.ErrBadRequest
 	}
 	if err := validate.Struct(req); err != nil {
+		log.Println(err)
 		return echo.ErrBadRequest
 	}
 	// debug
