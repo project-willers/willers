@@ -14,6 +14,7 @@
     "@emotion/styled": "latest",
     "@hookform/resolvers": "^2.8.8",
     "@mui/icons-material": "latest",
+    "@mui/lab": "^5.0.0-alpha.69",
     "@mui/material": "latest",
     "@types/react-calendar": "^3.4.5",
     "axios": "^0.25.0",
