@@ -1,3 +1,4 @@
+import { client } from '@/api-client/client'
 import { Send } from '@mui/icons-material'
 import { DatePicker } from '@mui/lab'
 import {
@@ -13,6 +14,7 @@ import {
   TextField,
 } from '@mui/material'
 import { Box } from '@mui/system'
+import { format } from 'date-fns'
 import { useState } from 'react'
 
 /**
@@ -42,6 +44,19 @@ export const DiaryEditDialog: React.VFC<DiaryEditDialogProps> = (props) => {
   const [date, setDate] = useState<Date | null>(new Date())
   const [template, setTemplate] = useState<Template>(templates[0])
   const [content, setContent] = useState('')
+
+  const onSendClicked = async () => {
+    if (!date) {
+      return
+    }
+
+    await client.post('/api/diary/write', {
+      name: 'test',
+      content,
+      selectAt: format(date, 'yyyy-MM-dd HH:mm:ss'),
+    })
+    await client.get('/api/diary/read').then(console.log)
+  }
 
   return (
     <Dialog maxWidth="md" fullWidth open={props.open} onClose={props.onClose}>
@@ -92,7 +107,12 @@ export const DiaryEditDialog: React.VFC<DiaryEditDialogProps> = (props) => {
           <Grid item xs={12}>
             <Box sx={{ display: 'flex' }}>
               <Box flex={1} />
-              <Button variant="contained" disableElevation startIcon={<Send />}>
+              <Button
+                variant="contained"
+                disableElevation
+                startIcon={<Send />}
+                onClick={onSendClicked}
+              >
                 送信
               </Button>
             </Box>
