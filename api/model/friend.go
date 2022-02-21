@@ -175,7 +175,7 @@ func AddFriend(res *FriendResponse) error {
 }
 
 func DeleteFriend(friend *Friend) error {
-	if err := friend.FindFriend(); err != nil {
+	if err := friend.FindFriend(); err == nil {
 		return err
 	}
 

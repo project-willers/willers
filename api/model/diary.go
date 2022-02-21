@@ -110,7 +110,7 @@ func AddDiary(diary *Diary) error {
 }
 
 func DeleteDiary(diary *Diary) error {
-	if err := diary.GetDiary(); err != nil {
+	if err := diary.GetDiary(); err == nil {
 		log.Println(err)
 		return err
 	}
