@@ -1,3 +1,4 @@
+import { client } from '@/api-client/client'
 import { useLoading } from '@/hooks/useLoading'
 import { jwtAtom, userAtom } from '@/states/auth'
 import {
@@ -38,7 +39,7 @@ export const AppLayout: React.VFC<AppLayoutProps> = (props) => {
   const { children, title } = { title: 'Willers', ...props }
 
   const router = useRouter()
-  const [, setJWT] = useAtom(jwtAtom)
+  const [jwt, setJWT] = useAtom(jwtAtom)
   const [user] = useAtom(userAtom)
   const [loading, load] = useLoading()
 
@@ -48,11 +49,14 @@ export const AppLayout: React.VFC<AppLayoutProps> = (props) => {
 
   useEffect(() => {
     load(async () => {
-      if (!user) {
+      if (user) {
+        client.defaults.headers.common['Authorization'] = `Bearer ${jwt}`
+      } else {
+        client.defaults.headers.common['Authorization'] = ''
         await router.push('/login')
       }
     })
-  }, [user, router, load])
+  }, [user, jwt, router, load])
 
   if (!user) {
     return <></>
