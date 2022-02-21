@@ -70,10 +70,6 @@ func UpdateComment(comment *Comment) error {
 }
 
 func AddComment(comment *Comment) error {
-	if err := comment.GetComment(); err != nil {
-		return err
-	}
-
 	insert, err := db.Database.Prepare("INSERT INTO comments(diary_user, diary_time, cmt_user, cmt) VALUE(?, ?, ?, ?)")
 	if err != nil {
 		return err
@@ -92,7 +88,7 @@ func AddComment(comment *Comment) error {
 }
 
 func DeleteComment(comment *Comment) error {
-	if err := comment.GetComment(); err != nil {
+	if err := comment.GetComment(); err == nil {
 		return err
 	}
 
