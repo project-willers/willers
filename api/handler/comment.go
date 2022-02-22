@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"willers-api/model"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
+
+	"willers-api/model"
 )
 
 func CommentWrite(c echo.Context) error {
