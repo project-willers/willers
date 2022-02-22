@@ -17,7 +17,8 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 
-	db.Initdb()
+	db.Init()
+	defer db.Database.Close()
 
 	e := router.Init()
 

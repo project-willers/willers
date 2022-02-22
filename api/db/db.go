@@ -13,9 +13,10 @@ var (
 	Database *sql.DB
 )
 
-func Initdb() {
+func Init() {
 	var err error
 	Database, err = sql.Open("mysql", "root:example@tcp(willers-mysql:3306)/willers?parseTime=true&loc=Asia%2FTokyo")
+	// Database, err = sql.Open("mysql", config.DSN())
 	if err != nil {
 		log.Fatal("Database Connect error: ", err)
 	}
