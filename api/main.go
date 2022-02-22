@@ -11,8 +11,6 @@ import (
 	"willers-api/router"
 )
 
-// var hmacSecret = os.Getenv("SIGNINGKEY")
-
 func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
@@ -23,6 +21,7 @@ func main() {
 	e := router.Init()
 
 	go func() {
+		// if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil && err != http.ErrServerClosed {
 		if err := e.Start(":1323"); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server")
 		}

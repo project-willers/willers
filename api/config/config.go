@@ -19,3 +19,7 @@ func DSN() string {
 		os.Getenv("DB_DATABASE"),
 	) + "?parseTime=true&loc=Asia%2FTokyo&collation=utf8mb4_bin"
 }
+
+func Secret() string {
+	return os.Getenv("SECRET")
+}
