@@ -14,9 +14,11 @@ func Login(c echo.Context) error {
 	// JSON request
 	u := new(model.LoginInfo)
 	if err := c.Bind(u); err != nil {
+		log.Println(err)
 		return err
 	}
 	if err := validate.Struct(u); err != nil {
+		log.Println(err)
 		return err
 	}
 
@@ -25,6 +27,7 @@ func Login(c echo.Context) error {
 	user := &model.Account{}
 	user, err := model.FindUser(&model.LoginInfo{Name: u.Name})
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 

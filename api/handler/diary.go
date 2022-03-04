@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"willers-api/model"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,27 +20,37 @@ func DiaryWrite(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, diary)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if name != diary.UserName {
+		return c.JSON(http.StatusNotAcceptable, "")
+	}
+
 	if err := model.AddDiary(diary); err != nil {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "{}")
 }
 
 func DiaryRead(c echo.Context) error {
-	// TODO
-	// jwt tokenからusernameを取得
-	userName := ""
-	// debug
-	fmt.Fprintln(os.Stdout, userName)
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
 
-	diaries, err := model.GetDiaries(userName)
+	diaries, err := model.GetDiaries(name)
 	if err != nil {
 		return err
 	}
 
-	json, err := json.Marshal(diaries)
-	return c.JSON(http.StatusOK, json)
+	d := model.D{
+		Diaries: diaries,
+	}
+
+	return c.JSON(http.StatusOK, d)
 }
 
 func DiaryEdit(c echo.Context) error {
@@ -53,13 +63,23 @@ func DiaryEdit(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, diary)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if name != diary.UserName {
+		return c.JSON(http.StatusNotAcceptable, "")
+	}
+
 	if err := model.UpdateDiary(diary); err != nil {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "{}")
 }
 
+// まだ実装できてないです。
 func DiaryDelete(c echo.Context) error {
 	diary := new(model.Diary)
 	if err := c.Bind(diary); err != nil {
@@ -70,9 +90,18 @@ func DiaryDelete(c echo.Context) error {
 	}
 	// debug
 	fmt.Fprintln(os.Stdout, diary)
+
+	// Authorize
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	if name != diary.UserName {
+		return c.JSON(http.StatusNotAcceptable, "")
+	}
+
 	if err := model.DeleteDiary(diary); err != nil {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "{}")
 }

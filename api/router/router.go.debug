@@ -1,0 +1,46 @@
+package router
+
+import (
+	"net/http"
+
+	echo "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+
+	"willers-api/handler"
+)
+
+func Init() *echo.Echo {
+	// create instance
+	e := echo.New()
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodPost},
+	}))
+
+	// create routing
+	e.POST("/login", handler.Login)
+	e.POST("/register", handler.Register)
+
+	// TODO friends
+	e.GET("/friend", handler.GetFriends)
+	e.GET("/getmyfriendrequest", handler.GetMyFriendRequests)
+	e.GET("/getotherfriendrequest", handler.GetOtherFriendRequests)
+	e.POST("/friend/request", handler.RequestFriend)
+	e.POST("/friend/add", handler.AddFriend)
+	e.POST("/friend/delete", handler.DeleteFriend)
+
+	// TODO diary
+	e.GET("/diary/read", handler.DiaryRead)
+	e.POST("/diary/write", handler.DiaryWrite)
+	e.POST("/diary/edit", handler.DiaryEdit)
+	e.POST("/diary/delete", handler.DiaryDelete)
+
+	// TODO comment
+	e.GET("/comment/read", handler.CommentRead)
+	e.POST("/comment/write", handler.CommentWrite)
+	e.POST("/comment/edit", handler.CommentEdit)
+	e.POST("/comment/delete", handler.CommentDelete)
+
+	return e
+}

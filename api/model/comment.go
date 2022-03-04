@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"log"
 	"time"
 	"willers-api/db"
 )
@@ -17,12 +18,16 @@ type Comment struct {
 
 type Comments []*Comment
 
-func getComment(comment *Comment) (*Comment, error) {
+type C struct {
+	Comments Comments
+}
+
+func (comment *Comment) GetComment() error {
 	result := db.Database.QueryRowContext(context.Background(), "SELECT * FROM comments WHERE diary_user=? AND diary_time=? AND cmt_user=? AND cmt=?", comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
 	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
-		return nil, err
+		return err
 	}
-	return comment, nil
+	return nil
 }
 
 func GetComments(diary *Diary) (Comments, error) {
@@ -33,43 +38,73 @@ func GetComments(diary *Diary) (Comments, error) {
 
 	var comments Comments
 	for result.Next() {
-		c := &Comment{}
-		if err := result.Scan(c.DiaryUser, c.DiaryTime, c.CommentUser, c.Comment, c.CreatedAt, c.UpdatedAt); err != nil {
+		var c Comment
+		if err := result.Scan(&c.DiaryUser, &c.DiaryTime, &c.CommentUser, &c.Comment, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
-		comments = append(comments, c)
+		comments = append(comments, &c)
 	}
 	return comments, nil
 }
 
 func UpdateComment(comment *Comment) error {
-	if _, err := getComment(comment); err != nil {
+	if err := comment.GetComment(); err != nil {
 		return err
 	}
 
-	result := db.Database.QueryRowContext(context.Background(), "UPDATE comments SET cmt=? WHERE diary_user=? AND diary_time=? AND cmt_user=?", comment.DiaryUser, comment.DiaryTime, comment.CommentUser)
-	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
+	update, err := db.Database.Prepare("UPDATE comments SET cmt=? WHERE diary_user=? AND diary_time=? AND cmt_user=?")
+	if err != nil {
 		return err
 	}
+	defer update.Close()
+	result, err := update.ExecContext(context.Background(), comment.DiaryUser, comment.DiaryTime, comment.CommentUser)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Println(rowCnt)
 	return nil
 }
 
 func AddComment(comment *Comment) error {
-	if _, err := getComment(comment); err != nil {
+	insert, err := db.Database.Prepare("INSERT INTO comments(diary_user, diary_time, cmt_user, cmt) VALUE(?, ?, ?, ?)")
+	if err != nil {
 		return err
 	}
-
-	result := db.Database.QueryRowContext(context.Background(), "INSERT INTO comments(diary_user, diary_time, cmt_user, cmt) VALUE(?, ?, ?, ?)", comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
-	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
+	defer insert.Close()
+	result, err := insert.ExecContext(context.Background(), comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
+	if err != nil {
 		return err
 	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Println(rowCnt)
 	return nil
 }
 
 func DeleteComment(comment *Comment) error {
-	result := db.Database.QueryRowContext(context.Background(), "DELETE FROM comments WHERE diary_user=? AND diary_time=? AND cmt_user=? AND cmt=?", comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
-	if err := result.Scan(comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment, comment.CreatedAt, comment.UpdatedAt); err != nil {
+	if err := comment.GetComment(); err == nil {
 		return err
 	}
+
+	del, err := db.Database.Prepare("DELETE FROM comments WHERE diary_user=? AND diary_time=? AND cmt_user=? AND cmt=?")
+	if err != nil {
+		return err
+	}
+	defer del.Close()
+	result, err := del.ExecContext(context.Background(), comment.DiaryUser, comment.DiaryTime, comment.CommentUser, comment.Comment)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Println(rowCnt)
 	return nil
 }

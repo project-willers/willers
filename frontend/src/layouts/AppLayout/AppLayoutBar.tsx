@@ -1,6 +1,7 @@
-import { Logout, NoteAdd } from '@mui/icons-material'
-import { AppBar, IconButton, Toolbar, Typography } from '@mui/material'
+import { Group, Logout, NoteAdd } from '@mui/icons-material'
+import { AppBar, Button, IconButton, Toolbar, Typography } from '@mui/material'
 import { Box } from '@mui/system'
+import Link from 'next/link'
 
 /**
  * AppLayoutBar props.
@@ -10,13 +11,14 @@ export type AppLayoutBarProps = {
   title: string
   notifications: number
   logout(): void
+  addDiary(): void
 }
 
 /**
  * AppLayoutBar component.
  */
 export const AppLayoutBar: React.VFC<AppLayoutBarProps> = (props) => {
-  const { drawerWidth, title, notifications, logout } = props
+  const { drawerWidth, title, notifications, logout, addDiary } = props
 
   return (
     <>
@@ -30,7 +32,13 @@ export const AppLayoutBar: React.VFC<AppLayoutBarProps> = (props) => {
             {title}
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
-          <IconButton size="large" color="inherit">
+          <Link href="/friends" passHref>
+            <Button component="a" color="inherit" startIcon={<Group />}>
+              フレンド
+            </Button>
+          </Link>
+          <Box mx={1} />
+          <IconButton size="large" color="inherit" onClick={addDiary}>
             <NoteAdd />
           </IconButton>
           <Box mx={1} />

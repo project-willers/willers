@@ -6,7 +6,6 @@ import (
 	echo "github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"willers-api/auth"
 	"willers-api/handler"
 )
 
@@ -25,11 +24,12 @@ func Init() *echo.Echo {
 
 	// affect jwt middleware routing
 	api := e.Group("/api")
-	api.Use(middleware.JWTWithConfig(auth.Jwtconfig()))
+	api.Use(middleware.JWT([]byte("SECRETKEY")))
 
 	// TODO friends
-	api.GET("/friend", handler.GetFriend)
-	api.GET("/getfriendrequest", handler.GetFriendRequest)
+	api.GET("/friend", handler.GetFriends)
+	api.GET("/getmyfriendrequest", handler.GetMyFriendRequests)
+	api.GET("/getotherfriendrequest", handler.GetOtherFriendRequests)
 	api.POST("/friend/request", handler.RequestFriend)
 	api.POST("/friend/add", handler.AddFriend)
 	api.POST("/friend/delete", handler.DeleteFriend)

@@ -8,6 +8,8 @@ import { useAtom } from 'jotai'
 import { jwtAtom } from '@/states/auth'
 import { useEffect, useState } from 'react'
 import { destroyCookie, parseCookies, setCookie } from 'nookies'
+import { LocalizationProvider } from '@mui/lab'
+import AdapterDateFns from '@mui/lab/AdapterDateFns'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -44,7 +46,10 @@ function MyApp(props: MyAppProps) {
       <ThemeProvider theme={mainTheme}>
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />
-        <Component {...pageProps} />
+
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Component {...pageProps} />
+        </LocalizationProvider>
       </ThemeProvider>
     </CacheProvider>
   )
