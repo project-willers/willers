@@ -1,12 +1,10 @@
 package auth
 
 import (
-	"errors"
-	"fmt"
+	"crypto/sha512"
+	"encoding/hex"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 
 	"willers-api/model"
 )
@@ -33,25 +31,8 @@ func CreateToken(user *model.Account) (string, error) {
 	return tokenString, nil
 }
 
-func Jwtconfig() middleware.JWTConfig {
-	return middleware.JWTConfig{
-		TokenLookup: "query:token",
-		ParseTokenFunc: func(auth string, c echo.Context) (interface{}, error) {
-			keyFunc := func(t *jwt.Token) (interface{}, error) {
-				if t.Method.Alg() != "HS256" {
-					return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
-				}
-				return hmacSecret, nil
-			}
-
-			token, err := jwt.Parse(auth, keyFunc)
-			if err != nil {
-				return nil, err
-			}
-			if !token.Valid {
-				return nil, errors.New("invalid token")
-			}
-			return token, nil
-		},
-	}
+func HashStr(trg string) string {
+	sha512 := sha512.Sum512([]byte(trg))
+	hashed := hex.EncodeToString(sha512[:])
+	return hashed
 }

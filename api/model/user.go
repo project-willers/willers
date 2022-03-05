@@ -7,6 +7,8 @@ import (
 	"net/mail"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	"willers-api/db"
 )
 
@@ -28,47 +30,48 @@ type Account struct {
 }
 
 type LoginInfo struct {
-	Name     string    `json:"name"`
-	Password string    `json:"password" validate:"required,gte=8,lt=50"`
-	CreateAt time.Time `json:"created_at"`
+	Name     string `json:"name" validate:"required"`
+	Password string `json:"password" validate:"required,gte=8,lt=50"`
 }
 
-func FindUser(u *LoginInfo) (Account, error) {
-	var (
-		user   Account
-		result *sql.Rows
-	)
-	if _, err := mail.ParseAddress(u.Name); err != nil {
-		result, err = db.Database.QueryContext(context.Background(), "SELECT * FROM accounts WHERE name=?", u.Name)
+func FindUser(u *LoginInfo) (*Account, error) {
+	var result *sql.Row
+	if validEmail(u.Name) {
+		result = db.Database.QueryRowContext(context.Background(), "SELECT * FROM accounts WHERE email=?", u.Name)
 	} else {
-		result, err = db.Database.QueryContext(context.Background(), "SELECT * FROM accounts WHERE email=?", u.Name)
+		result = db.Database.QueryRowContext(context.Background(), "SELECT * FROM accounts WHERE name=?", u.Name)
 	}
-	defer result.Close()
-	for result.Next() {
-		if err := result.Scan(&user.Name, &user.Email, &user.Password); err != nil {
-			return user, err
-		}
-		break
+
+	account := &Account{}
+	if err := result.Scan(&account.Name, &account.Email, &account.Password); err != nil {
+		return nil, err
 	}
-	return user, nil
+	return account, nil
 }
 
 func CreateUser(u *Account) (*Account, error) {
-	var result *sql.Rows
-	if _, err := FindUser(&LoginInfo{Name: u.Name}); err != nil {
-		log.Println(err)
+	if _, err := FindUser(&LoginInfo{Name: u.Name}); err == nil {
 		return u, err
 	}
-	result, err := db.Database.QueryContext(context.Background(), "INSERT INTO accounts(name, email, password) VALUE(?, ?, ?)", u.Name, u.Email, u.Password)
+	log.Println(u)
+	insert, err := db.Database.Prepare("INSERT INTO accounts(name, email, password) VALUE(?, ?, ?)")
 	if err != nil {
 		return u, err
 	}
-	defer result.Close()
-	for result.Next() {
-		if err := result.Scan(&u.Name, &u.Email, &u.Password); err != nil {
-			return u, err
-		}
-		break
+	defer insert.Close()
+	result, err := insert.ExecContext(context.Background(), u.Name, u.Email, u.Password)
+	if err != nil {
+		return u, err
 	}
+	rowCnt, err := result.RowsAffected()
+	if err != nil {
+		return u, err
+	}
+	log.Println(rowCnt)
 	return u, nil
+}
+
+func validEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }

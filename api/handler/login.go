@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	echo "github.com/labstack/echo/v4"
 
 	"willers-api/auth"
@@ -15,15 +14,20 @@ func Login(c echo.Context) error {
 	// JSON request
 	u := new(model.LoginInfo)
 	if err := c.Bind(u); err != nil {
+		log.Println(err)
 		return err
 	}
-	if err := validator.New().Struct(u); err != nil {
+	if err := validate.Struct(u); err != nil {
+		log.Println(err)
 		return err
 	}
 
-	var user model.Account
+	u.Password = auth.HashStr(u.Password)
+
+	user := &model.Account{}
 	user, err := model.FindUser(&model.LoginInfo{Name: u.Name})
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
@@ -34,7 +38,7 @@ func Login(c echo.Context) error {
 		}
 	}
 
-	token, err := auth.CreateToken(&user)
+	token, err := auth.CreateToken(user)
 	if err != nil && token == "" {
 		return echo.ErrInternalServerError
 	}
