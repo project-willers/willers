@@ -28,23 +28,25 @@ func Init() *echo.Echo {
 
 	// TODO friends
 	api.GET("/friend", handler.GetFriends)
-	api.GET("/getmyfriendrequest", handler.GetMyFriendRequests)
-	api.GET("/getotherfriendrequest", handler.GetOtherFriendRequests)
+	// api.GET("/friend/:id/request", handler.GetMyFriendRequests)
+	api.GET("/friend/my/request", handler.GetMyFriendRequests)
+	api.GET("/friend/other/request", handler.GetOtherFriendRequests)
+
 	api.POST("/friend/request", handler.RequestFriend)
-	api.POST("/friend/add", handler.AddFriend)
-	api.POST("/friend/delete", handler.DeleteFriend)
+	api.POST("/friend", handler.AddFriend)
+	api.DELETE("/friend", handler.DeleteFriend)
 
 	// TODO diary
-	api.GET("/diary/read", handler.DiaryRead)
-	api.POST("/diary/write", handler.DiaryWrite)
-	api.POST("/diary/edit", handler.DiaryEdit)
-	api.POST("/diary/delete", handler.DiaryDelete)
+	api.GET("/diary", handler.DiaryRead)
+	api.POST("/diary", handler.DiaryWrite)
+	api.PATCH("/diary", handler.DiaryEdit)
+	api.DELETE("/diary", handler.DiaryDelete)
 
 	// TODO comment
-	api.GET("/comment/read", handler.CommentRead)
-	api.POST("/comment/write", handler.CommentWrite)
-	api.POST("/comment/edit", handler.CommentEdit)
-	api.POST("/comment/delete", handler.CommentDelete)
+	api.GET("/comment", handler.CommentRead)
+	api.POST("/comment", handler.CommentWrite)
+	api.PATCH("/comment", handler.CommentEdit)
+	api.DELETE("/comment", handler.CommentDelete)
 
 	return e
 }

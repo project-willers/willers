@@ -156,7 +156,12 @@ func AddFriend(res *FriendResponse) error {
 		defer insert.Close()
 		_, err = insert.ExecContext(context.Background(), req.MyName, req.OtherName)
 		if err != nil {
-			log.Println("AddFriend Insert-ExecContext() Error: ", err)
+			log.Println("AddFriend 1-Insert-ExecContext() Error: ", err)
+			return err
+		}
+		_, err = insert.ExecContext(context.Background(), req.OtherName, req.MyName)
+		if err != nil {
+			log.Println("AddFriend 2-Insert-ExecContext() Error: ", err)
 			return err
 		}
 	}
@@ -175,7 +180,7 @@ func AddFriend(res *FriendResponse) error {
 }
 
 func DeleteFriend(friend *Friend) error {
-	if err := friend.FindFriend(); err == nil {
+	if err := friend.FindFriend(); err != nil {
 		return err
 	}
 
