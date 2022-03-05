@@ -28,6 +28,7 @@
     "react-calendar": "^3.7.0",
     "react-dom": "latest",
     "react-hook-form": "^7.25.1",
+    "react-markdown": "^8.0.0",
     "yup": "^0.32.11"
   },
   "devDependencies": {
