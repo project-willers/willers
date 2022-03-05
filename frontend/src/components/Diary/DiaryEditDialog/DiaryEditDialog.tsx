@@ -1,4 +1,7 @@
-import { client } from '@/api-client/client'
+import { diaryEdit } from '@/api-client/diaryEdit'
+import { diaryWrite } from '@/api-client/diaryWrite'
+import { userAtom } from '@/states/auth'
+import { Diary } from '@/types/Diary'
 import { Send } from '@mui/icons-material'
 import { DatePicker } from '@mui/lab'
 import {
@@ -15,7 +18,8 @@ import {
 } from '@mui/material'
 import { Box } from '@mui/system'
 import { format } from 'date-fns'
-import { useState } from 'react'
+import { useAtom } from 'jotai'
+import { useEffect, useState } from 'react'
 
 /**
  * DiaryEditDialog props.
@@ -23,6 +27,8 @@ import { useState } from 'react'
 export type DiaryEditDialogProps = {
   open: boolean
   onClose: () => void
+  onSave?(): void
+  diary?: Diary
 }
 
 type Template = {
@@ -41,21 +47,41 @@ const templates: Template[] = [
  * DiaryEditDialog component.
  */
 export const DiaryEditDialog: React.VFC<DiaryEditDialogProps> = (props) => {
-  const [date, setDate] = useState<Date | null>(new Date())
+  const { diary } = props
+  const [date, setDate] = useState<Date | null>(
+    diary?.selectAt ? new Date(diary.selectAt) : new Date()
+  )
   const [template, setTemplate] = useState<Template>(templates[0])
-  const [content, setContent] = useState('')
+  const [content, setContent] = useState(diary?.content ?? '')
+  const [user] = useAtom(userAtom)
+
+  useEffect(() => {
+    if (diary) {
+      setDate(new Date(diary.selectAt))
+      setTemplate(templates.find((t) => t.name === diary.name) ?? templates[0])
+      setContent(diary.content)
+    }
+  }, [diary])
 
   const onSendClicked = async () => {
     if (!date) {
       return
     }
 
-    await client.post('/api/diary/write', {
-      name: 'test',
+    if (!user) {
+      return
+    }
+
+    await diaryEdit({
+      name: user.name,
       content,
       selectAt: format(date, 'yyyy-MM-dd HH:mm:ss'),
+      updatedAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
     })
-    await client.get('/api/diary/read').then(console.log)
+
+    if (props.onSave) {
+      props.onSave()
+    }
   }
 
   return (

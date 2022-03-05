@@ -84,6 +84,7 @@ func UpdateDiary(diary *Diary) error {
 		return err
 	}
 	log.Println(rowCnt)
+	log.Println("updated")
 	return nil
 }
 
@@ -100,6 +101,7 @@ func AddDiary(diary *Diary) error {
 	defer insert.Close()
 	t, err := time.Parse("2006-01-02 15:04:05", diary.SelectAt)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	result, err := insert.ExecContext(context.Background(), diary.UserName, diary.Content, t)

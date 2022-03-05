@@ -1,6 +1,9 @@
 import { client } from '@/api-client/client'
+import { diaryRead } from '@/api-client/diaryRead'
 import { useLoading } from '@/hooks/useLoading'
 import { jwtAtom, userAtom } from '@/states/auth'
+import { diariesAtom, editDiaryAtom } from '@/states/diaries'
+import { Diary } from '@/types/Diary'
 import {
   AppBar,
   Box,
@@ -18,9 +21,10 @@ import {
 } from '@mui/material'
 import { useAtom } from 'jotai'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AppLayoutBar } from './AppLayoutBar'
 import { AppLayoutDrawer } from './AppLayoutDrawer'
+import { EditDiaryDialog } from './EditDiaryDialog'
 import { NewDiaryDialog } from './NewDiaryDialog'
 
 /**
@@ -42,6 +46,8 @@ export const AppLayout: React.VFC<AppLayoutProps> = (props) => {
   const router = useRouter()
   const [jwt, setJWT] = useAtom(jwtAtom)
   const [user] = useAtom(userAtom)
+  const [editDiary, setEditDiary] = useAtom(editDiaryAtom)
+  const [, setDiaries] = useAtom(diariesAtom)
   const [loading, load] = useLoading()
   const [openDiaryDialog, setOpenDiaryDialog] = useState(false)
 
@@ -49,16 +55,23 @@ export const AppLayout: React.VFC<AppLayoutProps> = (props) => {
     setJWT(null)
   }
 
+  const updateDiaries = useCallback(async () => {
+    const diaries = await diaryRead()
+
+    setDiaries(diaries)
+  }, [setDiaries])
+
   useEffect(() => {
     load(async () => {
       if (user) {
         client.defaults.headers.common['Authorization'] = `Bearer ${jwt}`
+        updateDiaries()
       } else {
         client.defaults.headers.common['Authorization'] = ''
         await router.push('/login')
       }
     })
-  }, [user, jwt, router, load])
+  }, [user, jwt, router, load, updateDiaries])
 
   if (!user) {
     return <></>
@@ -95,6 +108,13 @@ export const AppLayout: React.VFC<AppLayoutProps> = (props) => {
       <NewDiaryDialog
         open={openDiaryDialog}
         onClose={() => setOpenDiaryDialog(false)}
+        onSave={updateDiaries}
+      />
+      <EditDiaryDialog
+        open={!!editDiary}
+        onClose={() => setEditDiary(null)}
+        onSave={updateDiaries}
+        diary={editDiary as Diary}
       />
       <Box
         component="main"

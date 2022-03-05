@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"willers-api/model"
@@ -13,9 +14,11 @@ import (
 func DiaryWrite(c echo.Context) error {
 	diary := new(model.Diary)
 	if err := c.Bind(diary); err != nil {
+		log.Println(err)
 		return echo.ErrBadRequest
 	}
 	if err := validate.Struct(diary); err != nil {
+		log.Println(err)
 		return echo.ErrBadRequest
 	}
 	// debug

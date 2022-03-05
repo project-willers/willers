@@ -1,23 +1,26 @@
 import { DiaryEditDialog } from '@/components/Diary/DiaryEditDialog/DiaryEditDialog'
+import { Diary } from '@/types/Diary'
 
 /**
- * NewDiaryDialog props.
+ * EditDiaryDialog props.
  */
-export type NewDiaryDialogProps = {
+export type EditDiaryDialogProps = {
   open: boolean
   onClose: () => void
+  diary: Diary
   onSave?(): void
 }
 
 /**
- * NewDiaryDialog component.
+ * EditDiaryDialog component.
  */
-export const NewDiaryDialog: React.VFC<NewDiaryDialogProps> = (props) => {
+export const EditDiaryDialog: React.VFC<EditDiaryDialogProps> = (props) => {
   return (
     <DiaryEditDialog
       open={props.open}
       onClose={props.onClose}
       onSave={props.onSave}
+      diary={props.diary}
     />
   )
 }
